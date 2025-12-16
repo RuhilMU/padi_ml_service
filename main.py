@@ -25,7 +25,7 @@ transform = transforms.Compose([
 
 class_names = [
     'bacterial_leaf_blight', 
-    'brown_spot'
+    'brown_spot',
     'healthy', 
     'narrow_brown_spot', 
     'leaf_scald', 
