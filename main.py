@@ -51,22 +51,6 @@ except Exception as e:
     logger.error(f"Error loading model: {e}")
     model = None
 
-@app.on_event("startup")
-async def startup_event():
-    """Ensure model is loaded on startup"""
-    if model is None:
-        logger.error("CRITICAL: Model failed to load!")
-    else:
-        logger.info("Model ready for predictions")
-        # warm up
-        try:
-            dummy_tensor = torch.randn(1, 3, 224, 224).to(device)
-            with torch.no_grad():
-                _ = model(dummy_tensor)
-            logger.info("Model warmed up successfully")
-        except Exception as e:
-            logger.error(f"Model warmup failed: {e}")
-
 def preprocess_image(image_bytes):
     """Convert image bytes to tensor ready for prediction"""
     img = Image.open(io.BytesIO(image_bytes))
