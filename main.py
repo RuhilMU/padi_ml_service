@@ -33,9 +33,10 @@ class_names = [
 ]
 
 logger.info("Loading PyTorch model...")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = None
+
 try:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
     # Create DenseNet121
     from torchvision.models import densenet121
     model = densenet121(weights=None)    
@@ -49,6 +50,22 @@ try:
 except Exception as e:
     logger.error(f"Error loading model: {e}")
     model = None
+
+@app.on_event("startup")
+async def startup_event():
+    """Ensure model is loaded on startup"""
+    if model is None:
+        logger.error("CRITICAL: Model failed to load!")
+    else:
+        logger.info("Model ready for predictions")
+        # warm up
+        try:
+            dummy_tensor = torch.randn(1, 3, 224, 224).to(device)
+            with torch.no_grad():
+                _ = model(dummy_tensor)
+            logger.info("Model warmed up successfully")
+        except Exception as e:
+            logger.error(f"Model warmup failed: {e}")
 
 def preprocess_image(image_bytes):
     """Convert image bytes to tensor ready for prediction"""
