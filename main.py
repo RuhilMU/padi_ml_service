@@ -35,7 +35,15 @@ class_names = [
 logger.info("Loading PyTorch model...")
 try:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = torch.load(MODEL_PATH, map_location=device)
+    
+    # Create DenseNet121
+    from torchvision.models import densenet121
+    model = densenet121(weights=None)    
+    num_classes = 6
+    model.classifier = torch.nn.Linear(model.classifier.in_features, num_classes)    
+    state_dict = torch.load(MODEL_PATH, map_location=device)
+    model.load_state_dict(state_dict)    
+    model = model.to(device)
     model.eval()
     logger.info(f"Model loaded successfully on {device}!")
 except Exception as e:
